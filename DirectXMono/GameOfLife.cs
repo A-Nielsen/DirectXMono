@@ -3,11 +3,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using Myra;
+using Myra.Graphics2D.UI;
 
 namespace DirectXMono
 {
     public class GameOfLife : Game
     {
+        private Desktop _desktop;
+
         Texture2D gridTexture;
         Texture2D cellTexture;
 
