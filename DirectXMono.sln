@@ -5,6 +5,10 @@ VisualStudioVersion = 16.0.30406.217
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameOfLife", "GameOfLife\GameOfLife.csproj", "{F3EC8A1B-2234-40C6-BEBC-DF3526B099F2}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InfiniteGrid", "InfiniteGrid\InfiniteGrid.csproj", "{61D9052A-7599-4C20-8627-EBEC86826EE0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tetris", "Tetris\Tetris.csproj", "{F9B8A2DC-4212-4924-824E-297CBBC27292}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{F3EC8A1B-2234-40C6-BEBC-DF3526B099F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F3EC8A1B-2234-40C6-BEBC-DF3526B099F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3EC8A1B-2234-40C6-BEBC-DF3526B099F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61D9052A-7599-4C20-8627-EBEC86826EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61D9052A-7599-4C20-8627-EBEC86826EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61D9052A-7599-4C20-8627-EBEC86826EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61D9052A-7599-4C20-8627-EBEC86826EE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9B8A2DC-4212-4924-824E-297CBBC27292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9B8A2DC-4212-4924-824E-297CBBC27292}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9B8A2DC-4212-4924-824E-297CBBC27292}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9B8A2DC-4212-4924-824E-297CBBC27292}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
