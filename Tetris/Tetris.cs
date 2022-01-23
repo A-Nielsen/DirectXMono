@@ -29,6 +29,8 @@ namespace DirectXMono
         int gridThickness;
 
         double tetrisOffset;
+        int leftLimit;
+        int rightLimit;
 
         bool gameRunning;
 
@@ -63,6 +65,8 @@ namespace DirectXMono
             tetromino = new Tetromino(Shape.I);
 
             tetrisOffset = _graphics.PreferredBackBufferWidth / 2 / tileWidth;
+            leftLimit = (int)tetrisOffset - 5;
+            rightLimit = (int)tetrisOffset + 5;
 
             //Currently not adjustable, stay at one
             gridThickness = 1;
@@ -114,6 +118,16 @@ namespace DirectXMono
             };
             grid.Widgets.Add(fps);
 
+            var loops = new Label
+            {
+                Id = "LOOPS",
+                Text = "0",
+                GridColumn = 1,
+                GridRow = 1,
+
+            };
+            grid.Widgets.Add(loops);
+
             start.Click += (s, a) =>
             {
                 start.Visible = false;
@@ -148,6 +162,7 @@ namespace DirectXMono
         protected override void Draw(GameTime gameTime)
         {
             CheckInput();
+            LimitTetroX();
 
             //Set background
             GraphicsDevice.Clear(Color.SlateGray);
@@ -200,10 +215,12 @@ namespace DirectXMono
             {
                 for (int x = 0; x < width; x++)
                 {
+                    //grid
                     if (x % tileHeight == 0 || y % tileWidth == 0)
                         _spriteBatch.Draw(gridTexture, new Rectangle(x * gridThickness, y * gridThickness, gridThickness, gridThickness), Color.White);
 
-                    if (x / tileHeight == tetrisOffset - 5 || x / tileHeight == tetrisOffset + 5)
+                    //game limits
+                    if (x / tileHeight == leftLimit || x / tileHeight == rightLimit)
                         _spriteBatch.Draw(gridTextureBlack, new Rectangle(x * gridThickness, y * gridThickness, gridThickness, gridThickness), Color.White);
                 }
             }
@@ -229,16 +246,29 @@ namespace DirectXMono
                 tetrominoes.Add(bottomed); 
                 tetromino = new Tetromino(Shape.O);
             }
+        }
 
-
-            //Check if tetromino touches sides
-            int tetrominoLeft = tetromino.PosX + tetromino.ShapePos
+        public void LimitTetroX()
+        {
+            //Get tetromino far left position
+            int tetrominoLeft = (int)tetrisOffset + tetromino.PosX + tetromino.ShapePos
                 .OrderBy(t => t.x)
                 .FirstOrDefault().x;
 
-            int tetrominoRight = tetromino.PosX + tetromino.ShapePos
+            //If tetromino is over left limit, move right one
+            int tetrominoOverLeft = tetrominoLeft - leftLimit;
+            if (tetrominoOverLeft < 0)
+                tetromino.PosX++;
+
+            //Get tetromino far right position
+            int tetrominoRight = (int)tetrisOffset + tetromino.PosX + tetromino.ShapePos
                 .OrderByDescending(t => t.x)
                 .FirstOrDefault().x;
+
+            //If tetromino is over far right limit, move left one
+            int tetrominoOverRight =  rightLimit - tetrominoRight - 1;
+            if (tetrominoOverRight < 0)
+                tetromino.PosX--;
         }
 
         public bool CheckBottomCollision()
@@ -267,9 +297,54 @@ namespace DirectXMono
 
         public void RenderGame()
         {
-            int height = _graphics.PreferredBackBufferHeight;
-            int width = _graphics.PreferredBackBufferWidth;
-            
+            int loops = 0;
+
+            //draw settled tetrominoes
+            foreach(Tetromino tetro in tetrominoes) 
+            {
+                RenderTetromino(tetro, loops);
+            }
+
+            //Draw active tetromino
+            RenderTetromino(tetromino, loops);
+
+            var loopWidget = (Label)_desktop.Root.FindWidgetById("LOOPS");
+            loops = loops / (1 + tetrominoes.Count());
+            loopWidget.Text = "LOOPS/TETROMINO: " + loops.ToString();
+
+        }
+
+        public void RenderTetromino(Tetromino tetrominoToRender, int loops)
+        {
+            int maxY = tetrominoToRender.ShapePos.Max(x => x.y);
+            int minY = tetrominoToRender.ShapePos.Min(x => x.y);
+            int maxX = tetrominoToRender.ShapePos.Max(x => x.x);
+            int minX = tetrominoToRender.ShapePos.Min(x => x.x);
+            foreach ((int y, int x) i in tetrominoToRender.ShapePos)
+            {
+                for (int y = minY; y < maxY + 1; y++)
+                {
+                    for (int x = minX; x < maxX + 1; x++)
+                    {
+                        if (x % tileHeight == 0 || y % tileWidth == 0)
+                        {
+                            //X and Y coordinates for top left corner of squares
+                            int xTileWidth = (i.x + (int)tetrisOffset + tetrominoToRender.PosX) * (int)tileWidth;
+                            int yTileHeight = (i.y + tetrominoToRender.PosY) * (int)tileHeight;
+                            _spriteBatch.Draw(demoTetrominoTex, new Rectangle(xTileWidth, yTileHeight, (int)tileWidth, (int)tileHeight), Color.White);
+                            loops++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+/*          
+ *          
+ *          
             foreach(Tetromino tetro in tetrominoes) 
             { 
                 foreach ((int y, int x) i in tetro.ShapePos)
@@ -288,24 +363,24 @@ namespace DirectXMono
                     }
                 }
             }
-
-            
-            foreach ((int y, int x) i in tetromino.ShapePos)
+ *          
+ *          foreach ((int y, int x) i in tetromino.ShapePos)
             {
-                for (int y = 0; y < height; y++)
+                int xTileWidth = (i.x + (int)tetrisOffset + tetromino.PosX) * (int)tileWidth;
+                int yTileHeight = (i.y + tetromino.PosY) * (int)tileHeight;
+
+                for (int y = 0; y < yTileHeight; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (int x = 0; x < xTileWidth; x++)
                     {
                         if (x % tileHeight == 0 || y % tileWidth == 0)
                         {
-                            int xTileWidth = (i.x + (int)tetrisOffset + tetromino.PosX) * (int)tileWidth;
-                            int yTileHeight = (i.y + tetromino.PosY) * (int)tileHeight;
                             _spriteBatch.Draw(demoTetrominoTex, new Rectangle(xTileWidth, yTileHeight, (int)tileWidth, (int)tileHeight), Color.White);
                         }
                     }
+                    loops++;
                 }
             }
-            
-        }
-    }
-}
+            var fpsWidget = (Label)_desktop.Root.FindWidgetById("LOOPS");
+            fpsWidget.Text = "LOOPS/TETROMINO: " + loops.ToString();
+*/
