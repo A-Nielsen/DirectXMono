@@ -7,6 +7,7 @@ using Myra.Graphics2D.UI;
 using System;
 using Tetris.Objects;
 using System.Linq;
+using Tetris.Objects.StaticTetrominoes;
 
 namespace DirectXMono
 {
@@ -36,7 +37,7 @@ namespace DirectXMono
 
         Tetromino tetromino;
 
-        List<Tetromino> tetrominoes = new List<Tetromino>();
+        List<SquareRow> settledRows = new List<SquareRow>();
 
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
@@ -67,6 +68,27 @@ namespace DirectXMono
             tetrisOffset = _graphics.PreferredBackBufferWidth / 2 / tileWidth;
             leftLimit = (int)tetrisOffset - 5;
             rightLimit = (int)tetrisOffset + 5;
+
+            SquareRow row = new SquareRow(rightLimit - leftLimit);
+            row.Squares[0] = new Square();
+            row.Squares[1] = new Square();
+            row.Squares[2] = new Square();
+            row.Squares[3] = new Square();
+            row.Squares[4] = new Square();
+            row.Squares[5] = new Square();
+            row.Squares[6] = new Square();
+            row.Squares[9] = new Square();
+
+            settledRows.Add(row);
+            
+            SquareRow row2 = new SquareRow(rightLimit - leftLimit);
+            row2.Squares[0] = new Square();
+            row2.Squares[1] = new Square();
+            row2.Squares[7] = new Square();
+            row2.Squares[6] = new Square();
+            row2.Squares[9] = new Square();
+
+            settledRows.Add(row2);
 
             //Currently not adjustable, stay at one
             gridThickness = 1;
@@ -117,16 +139,6 @@ namespace DirectXMono
                 Text = "0"
             };
             grid.Widgets.Add(fps);
-
-            var loops = new Label
-            {
-                Id = "LOOPS",
-                Text = "0",
-                GridColumn = 1,
-                GridRow = 1,
-
-            };
-            grid.Widgets.Add(loops);
 
             start.Click += (s, a) =>
             {
@@ -238,12 +250,7 @@ namespace DirectXMono
             }
             else
             {
-                Tetromino bottomed = new Tetromino(tetromino.TetrominoShape);
-                bottomed.ShapePos = tetromino.ShapePos;
-                bottomed.PosY = tetromino.PosY;
-                bottomed.PosX = tetromino.PosX;
-
-                tetrominoes.Add(bottomed); 
+                //Add tetromino squares to settled rows
                 tetromino = new Tetromino(Shape.O);
             }
         }
@@ -273,24 +280,7 @@ namespace DirectXMono
 
         public bool CheckBottomCollision()
         {
-            int heightTiles = _graphics.PreferredBackBufferHeight / (int)tileHeight;
-            //check lowest playing field point collision
-            foreach ((int y, int x) i in tetromino.ShapePos)
-            {
-                if (heightTiles - 1 == i.y + tetromino.PosY)
-                    return true;
-
-                foreach (Tetromino tetrominoToCompare in tetrominoes)
-                {
-                    foreach ((int y, int x) iToCompare in tetrominoToCompare.ShapePos)
-                    {
-                        if (i.y + tetromino.PosY == iToCompare.y + tetrominoToCompare.PosY - 1)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
+            //Placeholder
 
             return false;
         }
@@ -299,19 +289,15 @@ namespace DirectXMono
         {
             int loops = 0;
 
-            //draw settled tetrominoes
-            foreach(Tetromino tetro in tetrominoes) 
-            {
-                RenderTetromino(tetro, loops);
+            int rowIndex = 0;
+            //draw settled squares
+            foreach (SquareRow row in settledRows) {
+                RenderSettledRow(row, rowIndex);
+                rowIndex++;
             }
 
             //Draw active tetromino
             RenderTetromino(tetromino, loops);
-
-            var loopWidget = (Label)_desktop.Root.FindWidgetById("LOOPS");
-            loops = loops / (1 + tetrominoes.Count());
-            loopWidget.Text = "LOOPS/TETROMINO: " + loops.ToString();
-
         }
 
         public void RenderTetromino(Tetromino tetrominoToRender, int loops)
@@ -336,6 +322,19 @@ namespace DirectXMono
                         }
                     }
                 }
+            }
+        }
+
+        public void RenderSettledRow(SquareRow row, int rowIndex)
+        {
+            int y = _graphics.PreferredBackBufferHeight - ((int)tileHeight * rowIndex) - (int)tileHeight;
+            int x = leftLimit * (int)tileWidth;
+            foreach(Square square in row.Squares)
+            {
+                if(square is not null)
+                    _spriteBatch.Draw(demoTetrominoTex, new Rectangle(x, y, (int)tileWidth, (int)tileHeight), Color.White);
+
+                x += (int)tileWidth;
             }
         }
     }
